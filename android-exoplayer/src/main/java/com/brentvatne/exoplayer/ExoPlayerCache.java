@@ -27,7 +27,7 @@ import androidx.annotation.NonNull;
 public class ExoPlayerCache extends ReactContextBaseJavaModule {
 
     private static String DEFAULT_CACHE_CHILD_FOLDER = "exoplayercache";
-    private static long DEFAULT_CACHE_MAX_SIZE = 100 * 1024 * 1024;
+    private static long DEFAULT_CACHE_MAX_SIZE = 1000 * 1024 * 1024;
 
     private static ExoDatabaseProvider exoDatabaseProvider = null;
     private static File cacheFolder = null;
@@ -53,6 +53,7 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
         try {
             if(videoCache != null) {
                 cacheStats.putString("cacheFolder", cacheFolder.getPath());
+                cacheStats.putDouble("cacheSize", (double)DEFAULT_CACHE_MAX_SIZE);
 
                 long cacheSpace = videoCache.getCacheSpace();
                 cacheStats.putDouble("cacheSpace", (double)cacheSpace);
@@ -94,7 +95,7 @@ public class ExoPlayerCache extends ReactContextBaseJavaModule {
             return;
         }
         exoDatabaseProvider = new ExoDatabaseProvider(context);
-        cacheFolder = new File(context.getExternalCacheDir(), cacheChildFolder);
+        cacheFolder = new File(context.getFilesDir(), cacheChildFolder);
         videoCache = new SimpleCache(
             cacheFolder,
             new LeastRecentlyUsedCacheEvictor(cacheMaxSize),
