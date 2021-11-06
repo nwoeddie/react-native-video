@@ -70,8 +70,11 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
+import com.google.android.exoplayer2.upstream.cache.Cache;
+import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
+import java.io.File;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -157,6 +160,7 @@ class ReactExoplayerView extends FrameLayout implements
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
     private boolean controls;
+    private boolean useCache;
     // \ End props
 
     // React
@@ -183,10 +187,10 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
     };
-    
+
     public double getPositionInFirstPeriodMsForCurrentWindow(long currentPosition) {
         Timeline.Window window = new Timeline.Window();
-        if(!player.getCurrentTimeline().isEmpty()) {    
+        if(!player.getCurrentTimeline().isEmpty()) {
             player.getCurrentTimeline().getWindow(player.getCurrentWindowIndex(), window);
         }
         return window.windowStartTimeMs + currentPosition;
@@ -523,6 +527,24 @@ class ReactExoplayerView extends FrameLayout implements
                         config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                 ).createMediaSource(uri);
             case C.TYPE_OTHER:
+                if(this.useCache) {
+                    try {
+                        Cache videoCache = ExoPlayerCache.getVideoCache(getContext());
+                        DataSource.Factory cacheDataSourceFactory = new CacheDataSourceFactory(videoCache, mediaDataSourceFactory);
+
+                        return new ProgressiveMediaSource.Factory(
+                                cacheDataSourceFactory
+                        ).setLoadErrorHandlingPolicy(
+                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                        ).createMediaSource(uri);
+                    } catch (Exception e) {
+                        return new ProgressiveMediaSource.Factory(
+                                mediaDataSourceFactory
+                        ).setLoadErrorHandlingPolicy(
+                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                        ).createMediaSource(uri);
+                    }
+                }
                 return new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
                 ).setDrmSessionManager(drmSessionManager)
@@ -1393,5 +1415,14 @@ class ReactExoplayerView extends FrameLayout implements
                 removeViewAt(indexOfPC);
             }
         }
+    }
+
+    /**
+     * Handling useCache prop
+     *
+     * @param useCache  Use cache prop, if true enable cache, if false disable it
+     */
+    public void setUseCache(boolean useCache) {
+        this.useCache = useCache;
     }
 }
