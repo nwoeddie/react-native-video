@@ -17,7 +17,7 @@ const {
   ExoPlayerCache
 } = NativeModules;
 
-export { 
+export {
   TextTrackType,
   FilterType,
   DRMType,
@@ -277,10 +277,6 @@ export default class Video extends Component {
     let uri = source.uri || '';
     if (uri && uri.match(/^\//)) {
       uri = `file://${uri}`;
-    }
-
-    if (!uri) {
-      console.warn('Trying to load empty source.');
     }
 
     const isNetwork = !!(uri && uri.match(/^https?:/));
