@@ -528,22 +528,14 @@ class ReactExoplayerView extends FrameLayout implements
                 ).createMediaSource(uri);
             case C.TYPE_OTHER:
                 if(this.useCache) {
-                    try {
-                        Cache videoCache = ExoPlayerCache.getVideoCache(getContext());
-                        DataSource.Factory cacheDataSourceFactory = new CacheDataSourceFactory(videoCache, mediaDataSourceFactory);
+                    Cache videoCache = ExoPlayerCache.getVideoCache(getContext());
+                    DataSource.Factory cacheDataSourceFactory = new CacheDataSourceFactory(videoCache, mediaDataSourceFactory);
 
-                        return new ProgressiveMediaSource.Factory(
-                                cacheDataSourceFactory
-                        ).setLoadErrorHandlingPolicy(
-                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                        ).createMediaSource(uri);
-                    } catch (Exception e) {
-                        return new ProgressiveMediaSource.Factory(
-                                mediaDataSourceFactory
-                        ).setLoadErrorHandlingPolicy(
-                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                        ).createMediaSource(uri);
-                    }
+                    return new ProgressiveMediaSource.Factory(
+                            cacheDataSourceFactory
+                    ).setLoadErrorHandlingPolicy(
+                            config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                    ).createMediaSource(uri);
                 }
                 return new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
